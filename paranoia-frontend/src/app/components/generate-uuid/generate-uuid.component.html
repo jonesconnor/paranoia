@@ -5,6 +5,9 @@
   
   <div *ngIf="uuid" class="success">
     UUID: {{ uuid }}
+    <button (click)="copyUuid()" class="copy-button">
+      {{ copied ? 'Copied!' : 'Copy' }}
+    </button>
   </div>
   
   <div *ngIf="error" class="error">
