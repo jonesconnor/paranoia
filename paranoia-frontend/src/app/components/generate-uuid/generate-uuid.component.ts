@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SecretService } from '../../services/secret.service';
 import { EncryptionService } from '../../services/encryption.service';
+import { ClipboardService } from '../../services/clipboard.service';
 
 @Component({
   selector: 'app-generate-uuid',
@@ -15,11 +16,20 @@ export class GenerateUuidComponent {
   secret: string = '';
   uuid: string = '';
   error: string = '';
+  copied: boolean = false;
 
   constructor(
     private secretService: SecretService,
-    private encryptionService: EncryptionService
+    private encryptionService: EncryptionService,
+    private clipboardService: ClipboardService
   ) { }
+
+  async copyUuid() {
+    if (this.uuid) {
+      this.copied = await this.clipboardService.copyToClipboard(this.uuid);
+      setTimeout(() => this.copied = false, 2000);
+    }
+  }
 
   generateUuid() {
     if (!this.secret) {
