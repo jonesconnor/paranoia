@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SecretService } from '../../services/secret.service';
+import { EncryptionService } from '../../services/encryption.service';
 
 @Component({
   selector: 'app-generate-uuid',
@@ -15,14 +16,20 @@ export class GenerateUuidComponent {
   uuid: string = '';
   error: string = '';
 
-  constructor(private secretService: SecretService) { }
+  constructor(
+    private secretService: SecretService,
+    private encryptionService: EncryptionService
+  ) { }
 
   generateUuid() {
     if (!this.secret) {
       this.error = 'Please enter a secret';
       return;
     }
-    this.secretService.generate_uuid(this.secret).subscribe({
+
+    const encryptedSecret = this.encryptionService.encrypt(this.secret);
+
+    this.secretService.generate_uuid(encryptedSecret).subscribe({
       next: (response) => {
         this.uuid = response.uuid;
         this.error = '';

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SecretService } from '../../services/secret.service';
-import { response } from 'express';
+import { EncryptionService } from '../../services/encryption.service';
 
 @Component({
   selector: 'app-get-secret',
@@ -16,7 +16,10 @@ export class GetSecretComponent {
   secret: string = '';
   error: string = '';
 
-  constructor(private secretService: SecretService) { }
+  constructor(
+    private secretService: SecretService,
+    private encryptionService: EncryptionService
+  ) { }
 
   getSecret() {
     if (!this.uuid) {
@@ -26,8 +29,13 @@ export class GetSecretComponent {
 
     this.secretService.get_secret(this.uuid).subscribe({
       next: (response) => {
-        this.secret = response.secret;
-        this.error = '';
+        try {
+          this.secret = this.encryptionService.decrypt(response.secret);
+          this.error = '';
+        } catch (e) {
+          this.error = 'Failed to decrypt secret';
+          this.secret = '';
+        }
       },
       error: (error) => {
         this.error = error.error.detail || 'Failed to retrieve secret';
