@@ -1,0 +1,13 @@
+<div>
+  <h2>Generate UUID</h2>
+  <input [(ngModel)]="secret" placeholder="Enter secret">
+  <button (click)="generateUuid()">Generate UUID</button>
+  
+  <div *ngIf="uuid" class="success">
+    UUID: {{ uuid }}
+  </div>
+  
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

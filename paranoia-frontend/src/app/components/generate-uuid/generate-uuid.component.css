@@ -1,0 +1,13 @@
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.success {
+  color: green;
+  margin-top: 10px;
+}
+
+input {
+  margin-right: 10px;
+}
