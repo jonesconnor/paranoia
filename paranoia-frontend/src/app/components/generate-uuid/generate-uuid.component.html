@@ -1,16 +1,28 @@
-<div>
-  <h2>Generate UUID</h2>
-  <input [(ngModel)]="secret" placeholder="Enter secret">
-  <button (click)="generateUuid()">Generate UUID</button>
+<div class="p-4 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
+  <h2 class="text-xl font-bold">Generate UUID</h2>
+  <input [(ngModel)]="secret" (ngModelChange)="checkPasswordStrength()" placeholder="Enter secret" class="border p-2 w-full">
+  <div *ngIf="passwordStrength" class="text-sm text-gray-600">
+    Password Strength:
+    <app-progress-bar [strength]="passwordStrength.score"></app-progress-bar>
+    <div *ngIf="passwordStrength.feedback.suggestions.length > 0">
+      Suggestions:
+      <ul>
+        <li *ngFor="let suggestion of passwordStrength.feedback.suggestions">{{ suggestion }}</li>
+      </ul>
+    </div>
+  </div>
+  <button (click)="generateUuid()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    Generate UUID
+  </button>
   
-  <div *ngIf="uuid" class="success">
+  <div *ngIf="uuid" class="text-green-600">
     UUID: {{ uuid }}
-    <button (click)="copyUuid()" class="copy-button">
+    <button (click)="copyUuid()" class="bg-green-500 text-white px-2 py-1 rounded ml-2 hover:bg-green-600">
       {{ copied ? 'Copied!' : 'Copy' }}
     </button>
   </div>
   
-  <div *ngIf="error" class="error">
+  <div *ngIf="error" class="text-red-600">
     {{ error }}
   </div>
 </div>
