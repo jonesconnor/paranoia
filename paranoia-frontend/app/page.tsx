@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import CryptoJS from "crypto-js"
 
 export default function PasswordSharing() {
   const [secret, setSecret] = useState("")
@@ -11,16 +12,21 @@ export default function PasswordSharing() {
 
   const handleGenerateUrl = async () => {
     try {
+
+      const key = CryptoJS.lib.WordArray.random(16).toString()
+      const encryptedSecret = CryptoJS.AES.encrypt(secret, key).toString()
+
       const response = await fetch("http://127.0.0.1:8000/generateuuid", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ secret }),
+        body: JSON.stringify({ secret: encryptedSecret }),
       })
       const data = await response.json()
       if (response.ok) {
-        setGeneratedUrl(data.url)
+        const urlWithKey = `${data.url}#${key}`
+        setGeneratedUrl(urlWithKey)
       } else {
         console.error("Failed to generate URL:", data.message)
       }
