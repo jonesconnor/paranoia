@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useParams } from 'next/navigation';
 import CryptoJS from "crypto-js";
+import { Copy } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function RevealPassword() {
   const params = useParams()
@@ -12,6 +14,7 @@ export default function RevealPassword() {
   const [isRevealed, setIsRevealed] = useState(false)
   const [secret, setSecret] = useState("")
   const [error, setError] = useState("")
+  const { toast } = useToast()
 
   const getKeyFromUrl = () => {
     const hash = window.location.hash
@@ -26,13 +29,13 @@ export default function RevealPassword() {
     const fetchSecret = async () => {
       try {
         const key = getKeyFromUrl();
-        
+
         const response = await fetch(`http://127.0.0.1:8000/getsecret/${id}`)
         const data = await response.json()
         if (response.ok) {
           const decryptedSecret = CryptoJS.AES.decrypt(data.secret, key).toString(CryptoJS.enc.Utf8)
           setSecret(decryptedSecret)
-          
+
           window.history.replaceState(null, "", window.location.pathname);
         } else {
           setError(data.message || "Failed to retrieve secret")
@@ -47,6 +50,20 @@ export default function RevealPassword() {
     }
     fetchSecret()
   }, [id])
+
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(secret)
+      .then(() => {
+        toast({
+          title: "Copied!",
+          content: "The secret has been copied to your clipboard.",
+        })
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err)
+      })
+  }
 
   return (
     <div className="min-h-screen bg-quaternary flex items-center justify-center p-4">
@@ -64,12 +81,17 @@ export default function RevealPassword() {
                 <div className="bg-tertiary p-4 rounded-md relative overflow-hidden">
                   <div className={`transition-all duration-300 ${isRevealed ? "blur-none" : "blur-md"}`}>{secret}</div>
                 </div>
-                <Button
-                  onClick={() => setIsRevealed(!isRevealed)}
-                  className="w-full bg-secondary hover:bg-primary text-white transition-colors"
-                >
-                  {isRevealed ? "Hide" : "Reveal"}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => setIsRevealed(!isRevealed)}
+                    className="w-full bg-secondary hover:bg-primary text-white transition-colors"
+                  >
+                    {isRevealed ? "Hide" : "Reveal"}
+                  </Button>
+                  <Button onClick={copyToClipboard} className="bg-secondary hover:bg-primary text-white">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               </>
             )}
           </div>

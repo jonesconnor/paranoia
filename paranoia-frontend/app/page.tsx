@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import CryptoJS from "crypto-js"
+import { Copy } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function PasswordSharing() {
   const [secret, setSecret] = useState("")
   const [generatedUrl, setGeneratedUrl] = useState("")
+  const { toast } = useToast()
 
   const handleGenerateUrl = async () => {
     try {
@@ -33,6 +36,20 @@ export default function PasswordSharing() {
     } catch (error) {
       console.error("Error generating URL:", error)
     }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast({
+          title: "Copied!",
+          content: "The URL has been copied to your clipboard.",
+        })
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err)
+      })
   }
 
   return (
@@ -66,12 +83,20 @@ export default function PasswordSharing() {
             {generatedUrl && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-secondary mb-1">Share this URL</label>
-                <Input
-                  type="text"
-                  value={generatedUrl}
-                  readOnly
-                  className="w-full bg-tertiary text-primary font-medium"
-                />
+                <div className="flex">
+                  <Input
+                    type="text"
+                    value={generatedUrl}
+                    readOnly
+                    className="flex-grow bg-tertiary text-primary font-medium"
+                  />
+                  <Button
+                    onClick={() => copyToClipboard(generatedUrl)}
+                    className="ml-2 bg-secondary hover:bg-primary text-white"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
