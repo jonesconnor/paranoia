@@ -1,2 +1,0 @@
-1. "Try it yourself" area where there's a get-secret button with decryption
-and another get-secret button without decryption
