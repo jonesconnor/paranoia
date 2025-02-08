@@ -56,9 +56,10 @@ async def generate_uuid(secret: SecretModel, db: Session = Depends(get_db)):
     db.add(secret)
     db.commit()
     db.refresh(secret)
+    frontend_url = f"http://localhost:3000/reveal/{uuid}"
     return JSONResponse(status_code=201, content={"message": "Secret stored successfully!",
                                                   "uuid": uuid,
-                                                  "url": f"http://127.0.0.1:8000/getsecret/{uuid}"})
+                                                  "url": frontend_url})
 
 @app.get("/getsecret/{uuid}")
 async def get_secret(uuid: str, db: Session = Depends(get_db)):
