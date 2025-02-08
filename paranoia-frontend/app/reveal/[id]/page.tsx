@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useParams } from 'next/navigation';
+import CryptoJS from "crypto-js";
 
 export default function RevealPassword() {
   const params = useParams()
@@ -12,23 +13,38 @@ export default function RevealPassword() {
   const [secret, setSecret] = useState("")
   const [error, setError] = useState("")
 
+  const getKeyFromUrl = () => {
+    const hash = window.location.hash
+    if (!hash || hash === '#') {
+      throw new Error('No decryption key found in URL');
+    }
+    return decodeURIComponent(hash.substring(1));
+  }
+
   useEffect(() => {
     if (!id) return
-
     const fetchSecret = async () => {
       try {
+        const key = getKeyFromUrl();
+        
         const response = await fetch(`http://127.0.0.1:8000/getsecret/${id}`)
         const data = await response.json()
         if (response.ok) {
-          setSecret(data.secret)
+          const decryptedSecret = CryptoJS.AES.decrypt(data.secret, key).toString(CryptoJS.enc.Utf8)
+          setSecret(decryptedSecret)
+          
+          window.history.replaceState(null, "", window.location.pathname);
         } else {
           setError(data.message || "Failed to retrieve secret")
         }
       } catch (error) {
-        setError("Error retrieving secret")
+        if (error instanceof Error && error.message === 'No decryption key found in URL') {
+          setError("Missing decryption key in URL")
+        } else {
+          setError("Error retrieving or decrypting secret")
+        }
       }
     }
-
     fetchSecret()
   }, [id])
 
@@ -37,7 +53,7 @@ export default function RevealPassword() {
       <Card className="w-full max-w-md bg-white shadow-lg">
         <CardHeader className="bg-primary text-white rounded-t-lg">
           <CardTitle className="text-2xl font-bold">ParaNoia</CardTitle>
-          <CardDescription className="text-tertiary">Your secure information is here</CardDescription>
+          <CardDescription className="text-tertiary">The secrets await you!</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
