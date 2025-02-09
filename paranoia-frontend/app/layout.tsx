@@ -8,6 +8,13 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "ParaNoia - Secure Password Sharing",
   description: "Share your secrets securely",
+  icons: [
+    {
+      rel: 'icon',
+      type: 'image/svg+xml',
+      url: '/maze.svg',
+    },
+  ],
 }
 
 export default function RootLayout({
