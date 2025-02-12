@@ -1,7 +1,13 @@
+"""
+Utility functions for testing the ParaNoia application backend.
+
+This module provides helper functions for setting up and interacting with the test database,
+making API calls, creating test data, and asserting expected outcomes in tests.
+"""
+from uuid import UUID
 from typing import List, Optional
 from app.models import Secret
 from fastapi.testclient import TestClient
-from uuid import UUID
 
 def clean_test_db(db) -> None:
     """
@@ -17,11 +23,11 @@ def make_api_call(client: TestClient, endpoint: str, method: str = "GET", **kwar
     method = method.upper()
     if method == "GET":
         return client.get(endpoint, **kwargs)
-    elif method == "POST":
+    if method == "POST":
         return client.post(endpoint, json=kwargs)
-    elif method == "DELETE":
+    if method == "DELETE":
         return client.delete(endpoint, json=kwargs)
-    elif method == "PUT":
+    if method == "PUT":
         return client.put(endpoint, **kwargs)
     raise ValueError(f"Unsupported HTTP method: {method}")
 
@@ -34,7 +40,10 @@ def create_test_secret(db, secret_text: str ="password", uuid: str ="test-uuid")
     db.commit()
     return secret
 
-def create_test_secret_with_multiple_accesses(db, secret_text: str="password", uuid: str="test-uuid", remaining_accesses: int=5) -> Secret:
+def create_test_secret_with_multiple_accesses(db,
+                                              secret_text: str="password",
+                                              uuid: str="test-uuid",
+                                              remaining_accesses: int=5) -> Secret:
     """
     Create and return a test secret with multiple accesses in the database.
     """
@@ -43,7 +52,10 @@ def create_test_secret_with_multiple_accesses(db, secret_text: str="password", u
     db.commit()
     return secret
 
-def create_multiple_test_secrets(db, count: int, base_uuid: str="test-uuid", base_secret: str="test-secret") -> List[Secret]:
+def create_multiple_test_secrets(db,
+                                 count: int,
+                                 base_uuid: str="test-uuid",
+                                 base_secret: str="test-secret") -> List[Secret]:
     """
     Create multiple test secrets with incrementing identifiers.
     """
