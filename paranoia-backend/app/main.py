@@ -1,3 +1,20 @@
+"""
+Main application module for the ParaNoia backend.
+
+This module sets up the FastAPI application, including middleware, routes,
+and database interactions.
+It defines endpoints for generating UUIDs for secrets and retrieving secrets.
+
+Classes:
+    SecretModel: Pydantic model for validating secret data.
+
+Functions:
+    hello_world(): Endpoint to return a simple greeting message.
+    generate_uuid(secret: SecretModel, db: Session): Endpoint to generate a UUID for a secret and
+    store it in the database.
+    get_secret(uuid: str, db: Session): Endpoint to retrieve a secret by its UUID.
+"""
+from uuid import uuid4
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,8 +22,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from .database import get_db
 from .models import Secret
-
-from uuid import uuid4
 
 app = FastAPI()
 
@@ -19,17 +34,38 @@ app.add_middleware(
 )
 
 class SecretModel(BaseModel):
+    """
+    Pydantic model for validating secret data.
+
+    Attributes:
+        secret (str): The secret text to be stored.
+    """
     secret: str
 
 @app.get("/")
 def hello_world():
+    """
+    Endpoint to return a simple greeting message.
+
+    Returns:
+        dict: A dictionary containing a greeting message.
+    """
     return {"message": "Hello World"}
 
 @app.post("/generateuuid")
 async def generate_uuid(secret: SecretModel, db: Session = Depends(get_db)):
+    """
+    Endpoint to generate a UUID for a secret and stores it in the database.
+
+    Args:
+        secret (SecretModel): The secret data to be stored.
+        db (Session): The database session.
+
+    Returns:
+        JSONResponse: A JSON response containing the UUID and URL of the stored secret.
+    """
     if not secret.secret.strip():
         return JSONResponse(status_code=400, content={"message": "Secret cannot be empty"})
-    
     uuid = str(uuid4())
     secret = Secret(secret=secret.secret, uuid=uuid)
     db.add(secret)
@@ -42,6 +78,17 @@ async def generate_uuid(secret: SecretModel, db: Session = Depends(get_db)):
 
 @app.get("/getsecret/{uuid}")
 async def get_secret(uuid: str, db: Session = Depends(get_db)):
+    """
+    Endpoint to retrieve a secret by its UUID.
+
+    Args:
+        uuid (str): The UUID of the secret to be retrieved.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the secret text if found.
+        JSONResponse: A JSON response with a 404 status code if the secret is not found.
+    """
     secret = db.query(Secret).filter(Secret.uuid == uuid, Secret.remaining_accesses > 0).first()
     if secret:
         secret.remaining_accesses -= 1
