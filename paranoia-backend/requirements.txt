@@ -4,3 +4,4 @@ sqlalchemy
 psycopg2
 httpx
 pytest
+gunicorn
