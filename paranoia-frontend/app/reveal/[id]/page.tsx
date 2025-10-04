@@ -29,8 +29,12 @@ export default function RevealPassword() {
     const fetchSecret = async () => {
       try {
         const key = getKeyFromUrl();
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+        if (!apiBaseUrl) {
+          throw new Error('API base URL is not configured')
+        }
 
-        const response = await fetch(`http://127.0.0.1:8000/getsecret/${id}`)
+        const response = await fetch(`${apiBaseUrl}/getsecret/${id}`)
         const data = await response.json()
         if (response.ok) {
           const decryptedSecret = CryptoJS.AES.decrypt(data.secret, key).toString(CryptoJS.enc.Utf8)
@@ -100,4 +104,3 @@ export default function RevealPassword() {
     </div>
   )
 }
-

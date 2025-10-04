@@ -15,11 +15,15 @@ export default function PasswordSharing() {
 
   const handleGenerateUrl = async () => {
     try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+      if (!apiBaseUrl) {
+        throw new Error("API base URL is not configured")
+      }
 
       const key = CryptoJS.lib.WordArray.random(16).toString()
       const encryptedSecret = CryptoJS.AES.encrypt(secret, key).toString()
 
-      const response = await fetch("http://127.0.0.1:8000/generateuuid", {
+      const response = await fetch(`${apiBaseUrl}/generateuuid`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,4 +109,3 @@ export default function PasswordSharing() {
     </div>
   )
 }
-
