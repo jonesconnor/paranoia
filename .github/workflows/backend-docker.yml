@@ -1,0 +1,48 @@
+name: Backend Docker Build
+
+on:
+  push:
+    paths:
+      - 'paranoia-backend/**'
+      - '.github/workflows/backend-docker.yml'
+  pull_request:
+    paths:
+      - 'paranoia-backend/**'
+      - '.github/workflows/backend-docker.yml'
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        run: docker build -t paranoia-backend ./paranoia-backend
+
+      - name: Run smoke test
+        run: |
+          set -euo pipefail
+          container_id=$(docker run -d -e DATABASE_URL=sqlite:///./test.db -p 8000:8000 paranoia-backend)
+          cleanup() {
+            docker logs "$container_id" || true
+            docker stop "$container_id" || true
+          }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 15); do
+            if curl -fsS http://localhost:8000/ > /tmp/response.json; then
+              if grep -q '"message"[[:space:]]*:[[:space:]]*"Hello World"' /tmp/response.json; then
+                exit 0
+              fi
+              echo "Unexpected response payload" >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          echo "Service did not become ready in time" >&2
+          exit 1
