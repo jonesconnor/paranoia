@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from .config import FRONTEND_BASE_URL
 from .database import get_db
 from .models import Secret
 
@@ -71,7 +72,7 @@ async def generate_uuid(secret: SecretModel, db: Session = Depends(get_db)):
     db.add(secret)
     db.commit()
     db.refresh(secret)
-    frontend_url = f"http://localhost:3000/reveal/{uuid}"
+    frontend_url = f"{FRONTEND_BASE_URL.rstrip('/')}/reveal/{uuid}"
     return JSONResponse(status_code=201, content={"message": "Secret stored successfully!",
                                                   "uuid": uuid,
                                                   "url": frontend_url})
