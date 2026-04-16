@@ -6,7 +6,7 @@ It also provides a dependency function for obtaining a database session in FastA
 
 Attributes:
     engine: The SQLAlchemy engine connected to the database.
-    SessionLocal: The SQLAlchemy session factory.
+    SESSION_LOCAL: The SQLAlchemy session factory.
     Base: The declarative base class for ORM models.
 
 Functions:
@@ -17,7 +17,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from .config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SESSION_LOCAL = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
@@ -30,7 +30,7 @@ def get_db():
     Yields:
         db (Session): A SQLAlchemy database session.
     """
-    db = SessionLocal()
+    db = SESSION_LOCAL()
     try:
         yield db
     finally:
