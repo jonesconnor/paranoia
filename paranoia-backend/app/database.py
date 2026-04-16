@@ -20,6 +20,10 @@ engine = create_engine(DATABASE_URL)
 SESSION_LOCAL = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+def init_db():
+    from . import models  # noqa: F401 — ensures models are registered on Base
+    Base.metadata.create_all(bind=engine)
+
 def get_db():
     """
     Dependency function for obtaining a database session.

@@ -21,7 +21,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from .config import FRONTEND_BASE_URL
-from .database import get_db
+from .database import get_db, init_db
+
+init_db()
 from .models import Secret
 
 app = FastAPI()
