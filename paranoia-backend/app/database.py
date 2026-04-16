@@ -11,6 +11,10 @@ Attributes:
 
 Functions:
     get_db(): Dependency function for obtaining a database session.
+
+Note:
+    Table creation is handled in main.py via Base.metadata.create_all to avoid
+    circular imports between this module and the models module.
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
