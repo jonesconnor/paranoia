@@ -14,6 +14,7 @@ Functions:
     store it in the database.
     get_secret(uuid: str, db: Session): Endpoint to retrieve a secret by its UUID.
 """
+from contextlib import asynccontextmanager
 from uuid import uuid4
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
@@ -21,12 +22,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from .config import FRONTEND_BASE_URL
-from .database import get_db, init_db
-
-init_db()
+from .database import get_db, Base, engine
 from .models import Secret
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Create database tables on startup."""
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
